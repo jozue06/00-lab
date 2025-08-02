@@ -21,6 +21,7 @@ export class EncryptionService {
 
   /**
    * Encrypts a Point object and returns the encrypted data as a base64 string
+   * This should ONLY be called on the backend - never expose keys to frontend
    */
   encryptPoint(point: Point): string {
     const jsonData = JSON.stringify(point);
@@ -42,6 +43,7 @@ export class EncryptionService {
 
   /**
    * Decrypts an encrypted point string and returns the Point object
+   * This should ONLY be called on the backend - never expose keys to frontend
    */
   decryptPoint(encryptedData: string): Point {
     const combined = Buffer.from(encryptedData, 'base64');
