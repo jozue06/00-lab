@@ -9,48 +9,56 @@ export interface Point {
   updated_at?: Date;
 }
 
+export interface EncryptedPoint {
+  id?: number;
+  encrypted_data: string;
+  iv: string;
+  salt: string;
+  created_at?: Date;
+  updated_at?: Date;
+}
+
 export interface PointRow {
   id: number;
-  points_data: string; // Encrypted JSONB data
+  encrypted_data: string;
+  iv: string;
+  salt: string;
   created_at: Date;
   updated_at: Date;
 }
 
 export class PointModel {
-  private encryptionService: EncryptionService;
-
-  constructor(encryptionService: EncryptionService) {
-    this.encryptionService = encryptionService;
-  }
-
   /**
-   * Converts a Point object to database row format (encrypts the data)
+   * Converts an EncryptedPoint to database row format
+   * Server cannot decrypt this data - it's end-to-end encrypted
    */
-  toRow(point: Point): Omit<PointRow, 'id' | 'created_at' | 'updated_at'> {
+  toRow(encryptedPoint: EncryptedPoint): Omit<PointRow, 'id' | 'created_at' | 'updated_at'> {
     return {
-      points_data: this.encryptionService.encryptPoint(point)
+      encrypted_data: encryptedPoint.encrypted_data,
+      iv: encryptedPoint.iv,
+      salt: encryptedPoint.salt
     };
   }
 
   /**
-   * Converts a database row to Point object (decrypts the data)
+   * Converts a database row to EncryptedPoint
+   * Server cannot decrypt this data - it's end-to-end encrypted
    */
-  fromRow(row: PointRow): Point {
-    const decryptedPoint = this.encryptionService.decryptPoint(row.points_data);
+  fromRow(row: PointRow): EncryptedPoint {
     return {
       id: row.id,
-      date: decryptedPoint.date,
-      title: decryptedPoint.title,
-      description: decryptedPoint.description,
+      encrypted_data: row.encrypted_data,
+      iv: row.iv,
+      salt: row.salt,
       created_at: row.created_at,
       updated_at: row.updated_at
     };
   }
 
   /**
-   * Converts multiple database rows to Point objects
+   * Converts multiple database rows to EncryptedPoint objects
    */
-  fromRows(rows: PointRow[]): Point[] {
+  fromRows(rows: PointRow[]): EncryptedPoint[] {
     return rows.map(row => this.fromRow(row));
   }
 }

@@ -1,7 +1,9 @@
--- Create points table with encrypted JSONB data
+-- Create points table for end-to-end encrypted data
 CREATE TABLE IF NOT EXISTS points (
     id SERIAL PRIMARY KEY,
-    points_data TEXT NOT NULL, -- Encrypted JSONB data stored as text
+    encrypted_data TEXT NOT NULL, -- Encrypted data (base64)
+    iv TEXT NOT NULL, -- Initialization vector (base64)
+    salt TEXT NOT NULL, -- Salt for key derivation (base64)
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

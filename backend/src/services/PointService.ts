@@ -1,35 +1,36 @@
-import { Pool, PoolClient } from 'pg';
-import { EncryptionService } from '../utils/encryption';
-import { PointModel, Point, PointRow } from '../models/Point';
+import { Pool } from 'pg';
+import { PointModel, EncryptedPoint, PointRow } from '../models/Point';
 
 export class PointService {
   private pointModel: PointModel;
 
-  constructor(
-    private pool: Pool,
-    encryptionService: EncryptionService
-  ) {
-    this.pointModel = new PointModel(encryptionService);
+  constructor(private pool: Pool) {
+    this.pointModel = new PointModel();
   }
 
   /**
-   * Creates a new point in the database
+   * Creates a new encrypted point in the database
+   * Server cannot decrypt this data - it's end-to-end encrypted
    */
-  async createPoint(point: Omit<Point, 'id' | 'created_at' | 'updated_at'>): Promise<Point> {
+  async createPoint(encryptedPoint: Omit<EncryptedPoint, 'id' | 'created_at' | 'updated_at'>): Promise<EncryptedPoint> {
     const client = await this.pool.connect();
     
     try {
-      const rowData = this.pointModel.toRow(point);
+      const rowData = this.pointModel.toRow(encryptedPoint);
       
       const query = `
-        INSERT INTO points (points_data, created_at, updated_at)
-        VALUES ($1, NOW(), NOW())
-        RETURNING id, points_data, created_at, updated_at
+        INSERT INTO points (encrypted_data, iv, salt, created_at, updated_at)
+        VALUES ($1, $2, $3, NOW(), NOW())
+        RETURNING id, encrypted_data, iv, salt, created_at, updated_at
       `;
       
-      const result = await client.query(query, [rowData.points_data]);
-      const row = result.rows[0] as PointRow;
+      const result = await client.query(query, [
+        rowData.encrypted_data,
+        rowData.iv,
+        rowData.salt
+      ]);
       
+      const row = result.rows[0] as PointRow;
       return this.pointModel.fromRow(row);
     } finally {
       client.release();
@@ -37,14 +38,15 @@ export class PointService {
   }
 
   /**
-   * Retrieves a point by ID
+   * Retrieves an encrypted point by ID
+   * Server cannot decrypt this data - it's end-to-end encrypted
    */
-  async getPointById(id: number): Promise<Point | null> {
+  async getPointById(id: number): Promise<EncryptedPoint | null> {
     const client = await this.pool.connect();
     
     try {
       const query = `
-        SELECT id, points_data, created_at, updated_at
+        SELECT id, encrypted_data, iv, salt, created_at, updated_at
         FROM points
         WHERE id = $1
       `;
@@ -63,14 +65,15 @@ export class PointService {
   }
 
   /**
-   * Retrieves all points
+   * Retrieves all encrypted points
+   * Server cannot decrypt this data - it's end-to-end encrypted
    */
-  async getAllPoints(): Promise<Point[]> {
+  async getAllPoints(): Promise<EncryptedPoint[]> {
     const client = await this.pool.connect();
     
     try {
       const query = `
-        SELECT id, points_data, created_at, updated_at
+        SELECT id, encrypted_data, iv, salt, created_at, updated_at
         FROM points
         ORDER BY created_at DESC
       `;
@@ -85,35 +88,28 @@ export class PointService {
   }
 
   /**
-   * Updates a point by ID
+   * Updates an encrypted point by ID
+   * Server cannot decrypt this data - it's end-to-end encrypted
    */
-  async updatePoint(id: number, point: Partial<Omit<Point, 'id' | 'created_at' | 'updated_at'>>): Promise<Point | null> {
+  async updatePoint(id: number, encryptedPoint: Omit<EncryptedPoint, 'id' | 'created_at' | 'updated_at'>): Promise<EncryptedPoint | null> {
     const client = await this.pool.connect();
     
     try {
-      // First get the existing point
-      const existingPoint = await this.getPointById(id);
-      if (!existingPoint) {
-        return null;
-      }
-      
-      // Merge with existing data
-      const updatedPoint: Omit<Point, 'id' | 'created_at' | 'updated_at'> = {
-        date: point.date ?? existingPoint.date,
-        title: point.title ?? existingPoint.title,
-        description: point.description ?? existingPoint.description
-      };
-      
-      const rowData = this.pointModel.toRow(updatedPoint);
+      const rowData = this.pointModel.toRow(encryptedPoint);
       
       const query = `
         UPDATE points
-        SET points_data = $1, updated_at = NOW()
-        WHERE id = $2
-        RETURNING id, points_data, created_at, updated_at
+        SET encrypted_data = $1, iv = $2, salt = $3, updated_at = NOW()
+        WHERE id = $4
+        RETURNING id, encrypted_data, iv, salt, created_at, updated_at
       `;
       
-      const result = await client.query(query, [rowData.points_data, id]);
+      const result = await client.query(query, [
+        rowData.encrypted_data,
+        rowData.iv,
+        rowData.salt,
+        id
+      ]);
       
       if (result.rows.length === 0) {
         return null;
@@ -127,7 +123,7 @@ export class PointService {
   }
 
   /**
-   * Deletes a point by ID
+   * Deletes an encrypted point by ID
    */
   async deletePoint(id: number): Promise<boolean> {
     const client = await this.pool.connect();

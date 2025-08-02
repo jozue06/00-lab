@@ -1,37 +1,38 @@
 import { Request, Response } from 'express';
 import { PointService } from '../services/PointService';
-import { Point } from '../models/Point';
+import { EncryptedPoint } from '../models/Point';
 
 export class PointController {
   constructor(private pointService: PointService) {}
 
   /**
-   * Create a new point
+   * Create a new encrypted point
+   * Server cannot decrypt this data - it's end-to-end encrypted
    */
   async createPoint(req: Request, res: Response): Promise<void> {
     try {
-      const { date, title, description } = req.body;
+      const { encrypted_data, iv, salt } = req.body;
 
       // Validate required fields
-      if (!date || !title || !description) {
+      if (!encrypted_data || !iv || !salt) {
         res.status(400).json({
-          error: 'Missing required fields: date, title, description'
+          error: 'Missing required fields: encrypted_data, iv, salt'
         });
         return;
       }
 
-      const point = await this.pointService.createPoint({
-        date,
-        title,
-        description
+      const encryptedPoint = await this.pointService.createPoint({
+        encrypted_data,
+        iv,
+        salt
       });
 
       res.status(201).json({
         success: true,
-        data: point
+        data: encryptedPoint
       });
     } catch (error) {
-      console.error('Error creating point:', error);
+      console.error('Error creating encrypted point:', error);
       res.status(500).json({
         error: 'Internal server error'
       });
@@ -39,18 +40,19 @@ export class PointController {
   }
 
   /**
-   * Get all points
+   * Get all encrypted points
+   * Server cannot decrypt this data - it's end-to-end encrypted
    */
   async getAllPoints(req: Request, res: Response): Promise<void> {
     try {
-      const points = await this.pointService.getAllPoints();
+      const encryptedPoints = await this.pointService.getAllPoints();
 
       res.status(200).json({
         success: true,
-        data: points
+        data: encryptedPoints
       });
     } catch (error) {
-      console.error('Error fetching points:', error);
+      console.error('Error fetching encrypted points:', error);
       res.status(500).json({
         error: 'Internal server error'
       });
@@ -58,7 +60,8 @@ export class PointController {
   }
 
   /**
-   * Get a point by ID
+   * Get an encrypted point by ID
+   * Server cannot decrypt this data - it's end-to-end encrypted
    */
   async getPointById(req: Request, res: Response): Promise<void> {
     try {
@@ -71,9 +74,9 @@ export class PointController {
         return;
       }
 
-      const point = await this.pointService.getPointById(id);
+      const encryptedPoint = await this.pointService.getPointById(id);
 
-      if (!point) {
+      if (!encryptedPoint) {
         res.status(404).json({
           error: 'Point not found'
         });
@@ -82,10 +85,10 @@ export class PointController {
 
       res.status(200).json({
         success: true,
-        data: point
+        data: encryptedPoint
       });
     } catch (error) {
-      console.error('Error fetching point:', error);
+      console.error('Error fetching encrypted point:', error);
       res.status(500).json({
         error: 'Internal server error'
       });
@@ -93,12 +96,13 @@ export class PointController {
   }
 
   /**
-   * Update a point
+   * Update an encrypted point
+   * Server cannot decrypt this data - it's end-to-end encrypted
    */
   async updatePoint(req: Request, res: Response): Promise<void> {
     try {
       const id = parseInt(req.params.id);
-      const { date, title, description } = req.body;
+      const { encrypted_data, iv, salt } = req.body;
 
       if (isNaN(id)) {
         res.status(400).json({
@@ -107,14 +111,20 @@ export class PointController {
         return;
       }
 
-      const updateData: Partial<Omit<Point, 'id' | 'created_at' | 'updated_at'>> = {};
-      if (date) updateData.date = date;
-      if (title) updateData.title = title;
-      if (description) updateData.description = description;
+      if (!encrypted_data || !iv || !salt) {
+        res.status(400).json({
+          error: 'Missing required fields: encrypted_data, iv, salt'
+        });
+        return;
+      }
 
-      const point = await this.pointService.updatePoint(id, updateData);
+      const encryptedPoint = await this.pointService.updatePoint(id, {
+        encrypted_data,
+        iv,
+        salt
+      });
 
-      if (!point) {
+      if (!encryptedPoint) {
         res.status(404).json({
           error: 'Point not found'
         });
@@ -123,10 +133,10 @@ export class PointController {
 
       res.status(200).json({
         success: true,
-        data: point
+        data: encryptedPoint
       });
     } catch (error) {
-      console.error('Error updating point:', error);
+      console.error('Error updating encrypted point:', error);
       res.status(500).json({
         error: 'Internal server error'
       });
@@ -134,7 +144,7 @@ export class PointController {
   }
 
   /**
-   * Delete a point
+   * Delete an encrypted point
    */
   async deletePoint(req: Request, res: Response): Promise<void> {
     try {
@@ -161,7 +171,7 @@ export class PointController {
         message: 'Point deleted successfully'
       });
     } catch (error) {
-      console.error('Error deleting point:', error);
+      console.error('Error deleting encrypted point:', error);
       res.status(500).json({
         error: 'Internal server error'
       });

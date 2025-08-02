@@ -2,18 +2,12 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { Pool } from 'pg';
-import { EncryptionService } from './utils/encryption';
 import { PointService } from './services/PointService';
 import { PointController } from './controllers/PointController';
 
 // Environment variables
 const PORT = process.env.PORT || 3000;
 const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://localhost:5432/points_db';
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
-
-if (!ENCRYPTION_KEY) {
-  throw new Error('ENCRYPTION_KEY environment variable is required');
-}
 
 // Initialize services
 const pool = new Pool({
@@ -21,8 +15,7 @@ const pool = new Pool({
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
-const encryptionService = new EncryptionService(ENCRYPTION_KEY);
-const pointService = new PointService(pool, encryptionService);
+const pointService = new PointService(pool);
 const pointController = new PointController(pointService);
 
 // Create Express app
