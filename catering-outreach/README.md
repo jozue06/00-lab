@@ -8,16 +8,19 @@ A Python tool to find catering businesses in your area, discover their contact e
 2. **Find emails** — Visits each business website and looks for contact addresses
 3. **Send** — Sends a polite, personalized outreach email (with dry-run mode enabled by default)
 
-## Quick start
+## Quick start (on your PC)
+
+> **First time?** See **[SETUP_ON_PC.md](SETUP_ON_PC.md)** for full Windows/Mac setup and how to save this to your GitHub (`apexwebworxusa-svg`).
 
 ```bash
-cd catering-outreach
 python3 -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 cp .env.example .env
 # Edit .env with your API keys, location, and email settings
 ```
+
+**Windows shortcut:** double-click `start-windows.bat`
 
 ### 1. Configure your environment
 
