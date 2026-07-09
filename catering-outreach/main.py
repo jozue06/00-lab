@@ -11,13 +11,10 @@ import argparse
 import csv
 import logging
 import sys
-from pathlib import Path
 
 from config import Settings
-from database import Lead, LeadDatabase
-from email_finder import EmailFinder
-from email_sender import EmailSender
-from scanner import BusinessScanner
+from database import LeadDatabase
+from services import find_emails, preview_email, scan_businesses, send_unsent_emails
 
 logging.basicConfig(
     level=logging.INFO,
@@ -28,50 +25,17 @@ logger = logging.getLogger("catering-outreach")
 
 
 def cmd_scan(settings: Settings, db: LeadDatabase) -> None:
-    scanner = BusinessScanner(settings)
-    businesses = scanner.scan()
-
-    added = 0
-    for business in businesses:
-        lead = Lead(
-            place_id=business.place_id,
-            name=business.name,
-            address=business.address,
-            phone=business.phone,
-            website=business.website,
-            email=None,
-            status="discovered",
-        )
-        db.upsert_lead(lead)
-        added += 1
-
-    logger.info("Saved %d businesses to database", added)
+    count = scan_businesses(settings, db)
+    logger.info("Saved %d businesses to database", count)
 
 
 def cmd_find_emails(db: LeadDatabase) -> None:
-    finder = EmailFinder()
-    leads = db.get_leads_by_status("discovered")
-    if not leads:
-        leads = [lead for lead in db.get_all_leads() if not lead.email]
-
-    found = 0
-    for lead in leads:
-        if not lead.website:
-            if lead.id is not None:
-                db.mark_no_email(lead.id, "No website listed")
-            logger.info("No website for %s — skipped", lead.name)
-            continue
-
-        email = finder.find_email(lead.website)
-        if email and lead.id is not None:
-            db.update_email(lead.id, email)
-            found += 1
-            logger.info("Found email for %s: %s", lead.name, email)
-        elif lead.id is not None:
-            db.mark_no_email(lead.id, "No email found on website")
-            logger.info("No email found for %s (%s)", lead.name, lead.website)
-
-    logger.info("Email lookup complete: %d emails found", found)
+    result = find_emails(db)
+    logger.info(
+        "Email lookup complete: %d found, %d skipped",
+        result["found"],
+        result["skipped"],
+    )
 
 
 def cmd_preview(settings: Settings, db: LeadDatabase) -> None:
@@ -80,38 +44,22 @@ def cmd_preview(settings: Settings, db: LeadDatabase) -> None:
         logger.info("No leads ready to email. Run scan + find-emails first.")
         return
 
-    sender = EmailSender(settings)
-    for lead in leads[: settings.max_emails_per_run]:
-        subject, body = sender._render_email(lead)
-        print("=" * 60)
-        print(f"To: {lead.name} <{lead.email}>")
-        print(f"Subject: {subject}")
-        print("-" * 60)
-        print(body)
-        print()
+    preview = preview_email(settings, db, lead_name=leads[0].name)
+    print("=" * 60)
+    print(f"To: {preview['name']} <{preview['to']}>")
+    print(f"Subject: {preview['subject']}")
+    print("-" * 60)
+    print(preview["body"])
+    print()
 
 
 def cmd_send(settings: Settings, db: LeadDatabase) -> None:
-    leads = db.get_leads_by_status("ready")
-    if not leads:
-        logger.info("No leads ready to email.")
-        return
-
     if settings.dry_run:
         logger.warning("DRY_RUN=true — emails will be logged but NOT sent")
 
-    sender = EmailSender(settings)
-    sent = 0
-    for lead in leads:
-        if sent >= settings.max_emails_per_run:
-            break
-        count = sender.send_batch([lead])
-        if count and not settings.dry_run and lead.id is not None:
-            db.mark_emailed(lead.id)
-        sent += count
-
-    mode = "simulated" if settings.dry_run else "sent"
-    logger.info("Outreach complete: %d emails %s", sent, mode)
+    result = send_unsent_emails(settings, db)
+    mode = "simulated" if result["dry_run"] else "sent"
+    logger.info("Outreach complete: %d emails %s", result["sent"], mode)
 
 
 def cmd_list(db: LeadDatabase) -> None:
@@ -153,7 +101,6 @@ def cmd_export(settings: Settings, db: LeadDatabase) -> None:
 
 
 def cmd_run_all(settings: Settings, db: LeadDatabase) -> None:
-    """Full pipeline: scan → find emails → send (respects dry_run)."""
     cmd_scan(settings, db)
     cmd_find_emails(db)
     cmd_send(settings, db)
@@ -172,13 +119,33 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers.add_parser("list", help="Show all leads in the database")
     subparsers.add_parser("export", help="Export leads to CSV")
     subparsers.add_parser("run-all", help="Run scan, find-emails, and send in one go")
+    subparsers.add_parser("web", help="Start the local web dashboard")
 
     return parser
+
+
+def cmd_web() -> None:
+    from app import init_app
+
+    init_app()
+    logger.info("Open http://127.0.0.1:5000 in your browser")
+    from app import app
+
+    app.run(host="127.0.0.1", port=5000, debug=False)
 
 
 def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
+
+    if args.command == "web":
+        try:
+            cmd_web()
+        except ValueError as exc:
+            logger.error("%s", exc)
+            logger.error("Copy .env.example to .env and fill in your values.")
+            return 1
+        return 0
 
     try:
         settings = Settings.load()

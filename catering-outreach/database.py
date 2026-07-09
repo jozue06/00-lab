@@ -47,6 +47,15 @@ class LeadDatabase:
                 )
                 """
             )
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS app_settings (
+                    key TEXT PRIMARY KEY,
+                    value TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                )
+                """
+            )
 
     def upsert_lead(self, lead: Lead) -> int:
         now = datetime.now(timezone.utc).isoformat()
@@ -57,11 +66,17 @@ class LeadDatabase:
             ).fetchone()
 
             if existing:
+                preserved_status = existing["status"]
+                if preserved_status in {"emailed", "ready", "no_email"}:
+                    lead_status = preserved_status
+                else:
+                    lead_status = lead.status
+
                 conn.execute(
                     """
                     UPDATE leads
                     SET name = ?, address = ?, phone = ?, website = ?,
-                        email = COALESCE(?, email), status = ?, notes = ?,
+                        email = COALESCE(?, email), status = ?, notes = COALESCE(notes, ?),
                         updated_at = ?
                     WHERE place_id = ?
                     """,
@@ -71,7 +86,7 @@ class LeadDatabase:
                         lead.phone,
                         lead.website,
                         lead.email,
-                        lead.status,
+                        lead_status,
                         lead.notes,
                         now,
                         lead.place_id,
@@ -113,6 +128,61 @@ class LeadDatabase:
         with self._connect() as conn:
             rows = conn.execute("SELECT * FROM leads ORDER BY name").fetchall()
         return [self._row_to_lead(row) for row in rows]
+
+    def get_stats(self) -> dict[str, int]:
+        with self._connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT status, COUNT(*) as count
+                FROM leads
+                GROUP BY status
+                """
+            ).fetchall()
+        counts = {row["status"]: row["count"] for row in rows}
+        total = sum(counts.values())
+        return {
+            "total": total,
+            "discovered": counts.get("discovered", 0),
+            "ready": counts.get("ready", 0),
+            "emailed": counts.get("emailed", 0),
+            "no_email": counts.get("no_email", 0),
+            "unsent": counts.get("ready", 0),
+        }
+
+    def get_unsent_leads(self) -> list[Lead]:
+        return self.get_leads_by_status("ready")
+
+    def get_setting(self, key: str, default: str = "") -> str:
+        with self._connect() as conn:
+            row = conn.execute(
+                "SELECT value FROM app_settings WHERE key = ?",
+                (key,),
+            ).fetchone()
+        return row["value"] if row else default
+
+    def set_setting(self, key: str, value: str) -> None:
+        now = datetime.now(timezone.utc).isoformat()
+        with self._connect() as conn:
+            conn.execute(
+                """
+                INSERT INTO app_settings (key, value, updated_at)
+                VALUES (?, ?, ?)
+                ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at
+                """,
+                (key, value, now),
+            )
+
+    def lead_to_dict(self, lead: Lead) -> dict:
+        return {
+            "id": lead.id,
+            "name": lead.name,
+            "address": lead.address,
+            "phone": lead.phone,
+            "website": lead.website,
+            "email": lead.email,
+            "status": lead.status,
+            "notes": lead.notes,
+        }
 
     def mark_emailed(self, lead_id: int) -> None:
         now = datetime.now(timezone.utc).isoformat()

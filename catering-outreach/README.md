@@ -33,7 +33,26 @@ Copy `.env.example` to `.env` and set:
 | `BUSINESS_ADDRESS` | Your physical address (CAN-SPAM requirement) |
 | `DRY_RUN` | Keep `true` until you've reviewed previews |
 
-### 2. Run the pipeline
+## Web dashboard (recommended)
+
+Start a local dashboard in your browser:
+
+```bash
+python main.py web
+```
+
+Then open **http://127.0.0.1:5000**
+
+The dashboard lets you:
+
+- **Scan businesses** in Springfield, Nixa, and Ozark
+- **Find emails** from their websites
+- **Write your own email** in the composer (subject + message)
+- **Preview** before sending
+- **Send only to unsent leads** — businesses already emailed are skipped automatically
+- **Filter leads** by status (ready, emailed, no email, etc.)
+
+### 2. Run the pipeline (CLI alternative)
 
 ```bash
 # Step by step (recommended first time)
@@ -66,6 +85,7 @@ python main.py export   # Creates exports/leads.csv
 | `list` | Show all leads and their status |
 | `export` | Export leads to CSV |
 | `run-all` | Run scan → find-emails → send |
+| `web` | Start the local web dashboard |
 
 ## Lead statuses
 
@@ -97,7 +117,7 @@ This tool is intended for legitimate B2B outreach to local businesses, not bulk 
 
 ## Customizing the email
 
-Edit `templates/outreach_email.txt`. Placeholders:
+Use the **Email composer** in the web dashboard, or edit `templates/outreach_email.txt` for the CLI default.
 
 - `{business_name}` — The catering company's name
 - `{sender_name}` — Your name from `.env`
@@ -137,14 +157,20 @@ SMTP_PASSWORD=your_16_char_app_password
 
 ```
 catering-outreach/
+├── app.py               # Local web dashboard (Flask)
 ├── main.py              # CLI entry point
+├── services.py          # Shared scan/send logic
 ├── config.py            # Settings from .env
 ├── scanner.py           # Google Places business search
 ├── email_finder.py      # Website email extraction
 ├── email_sender.py      # SMTP email delivery
 ├── database.py          # SQLite lead tracking
 ├── templates/
+│   ├── dashboard.html   # Web UI
 │   └── outreach_email.txt
+├── static/
+│   ├── app.css
+│   └── app.js
 ├── .env.example
 └── requirements.txt
 ```
