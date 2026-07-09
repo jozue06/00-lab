@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 700" width="600" height="700">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FF1493"/><stop offset="100%" stop-color="#00E5FF"/>
+    </linearGradient>
+    <linearGradient id="apex" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF6BB5"/><stop offset="50%" stop-color="#C850FF"/><stop offset="100%" stop-color="#00D4FF"/>
+    </linearGradient>
+    <filter id="gl"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="sg"><feGaussianBlur stdDeviation="1.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="600" height="700" fill="#000"/>
+  <polygon points="300,35 540,165 540,475 300,665 60,475 60,165" fill="none" stroke="url(#g)" stroke-width="4" stroke-linejoin="miter" filter="url(#gl)"/>
+  <polygon points="300,60 510,170 510,450 300,630 90,450 90,170" fill="none" stroke="url(#g)" stroke-width="1.5" opacity="0.65" filter="url(#sg)"/>
+  <circle cx="300" cy="210" r="50" fill="none" stroke="url(#g)" stroke-width="1.5" opacity="0.7"/>
+  <g stroke="url(#g)" stroke-width="1.2" opacity="0.5">
+    <line x1="300" y1="160" x2="300" y2="115"/><line x1="340" y1="172" x2="370" y2="142"/><line x1="260" y1="172" x2="230" y2="142"/>
+    <line x1="365" y1="205" x2="410" y2="188"/><line x1="235" y1="205" x2="190" y2="188"/>
+  </g>
+  <polyline points="115,285 165,225 205,265 245,235" fill="none" stroke="#FF1493" stroke-width="2" filter="url(#sg)"/>
+  <polyline points="355,235 395,265 435,225 485,285" fill="none" stroke="#00E5FF" stroke-width="2" filter="url(#sg)"/>
+  <path d="M165 295 Q195 320 225 295 Q195 270 165 295" fill="none" stroke="#FF1493" stroke-width="1.5" opacity="0.8"/>
+  <path d="M375 295 Q405 320 435 295 Q405 270 375 295" fill="none" stroke="#00E5FF" stroke-width="1.5" opacity="0.8"/>
+  <path d="M130 305 Q240 330 300 315 Q360 330 470 305" fill="none" stroke="url(#g)" stroke-width="1.5" opacity="0.4"/>
+  <g stroke="url(#g)" stroke-width="2" fill="none" filter="url(#sg)">
+    <rect x="262" y="230" width="76" height="130" rx="16"/><line x1="280" y1="230" x2="280" y2="360"/><line x1="320" y1="230" x2="320" y2="360"/>
+    <rect x="272" y="255" width="24" height="38" rx="5"/><rect x="304" y="255" width="24" height="38" rx="5"/>
+    <line x1="262" y1="300" x2="235" y2="300"/><line x1="338" y1="300" x2="365" y2="300"/>
+    <ellipse cx="242" cy="300" rx="9" ry="6"/><ellipse cx="358" cy="300" rx="9" ry="6"/>
+  </g>
+  <text x="300" y="455" text-anchor="middle" font-family="Poppins,Impact,sans-serif" font-size="72" font-weight="900" font-style="italic" fill="url(#apex)" stroke="#150828" stroke-width="2" filter="url(#gl)">APEX</text>
+  <text x="300" y="500" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="26" font-weight="600" letter-spacing="10" fill="url(#g)" filter="url(#sg)">DETAILING</text>
+  <line x1="220" y1="540" x2="275" y2="540" stroke="url(#g)" stroke-width="1.2" opacity="0.5"/>
+  <line x1="325" y1="540" x2="380" y2="540" stroke="url(#g)" stroke-width="1.2" opacity="0.5"/>
+  <g transform="translate(300,540)" fill="#00E5FF" filter="url(#sg)"><polygon points="0,-8 2.5,-2.5 8,0 2.5,2.5 0,8 -2.5,2.5 -8,0 -2.5,-2.5"/></g>
+</svg>
