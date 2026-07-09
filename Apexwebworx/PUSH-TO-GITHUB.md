@@ -1,34 +1,49 @@
-# Push to Apexwebworx GitHub
+# Push to apexwebworxusa-svg GitHub
 
-## Step 1 — Create the repo (one time)
+**Account:** https://github.com/apexwebworxusa-svg
+
+## Step 1 — Create repository (on apexwebworxusa-svg account)
+
+Log into **apexwebworxusa-svg** on GitHub, then:
 
 1. Go to **https://github.com/new**
-2. Repository name: **`Apexwebworx`**
-3. Description: `Apex Detailing brand assets and web project`
+2. Owner: **apexwebworxusa-svg**
+3. Repository name: **`apex-webworx`** (or `brand-assets`)
 4. Public
-5. **Do not** add README, .gitignore, or license (keep empty)
-6. Click **Create repository**
+5. **Empty repo** — no README, no .gitignore
+6. Create repository
 
-## Step 2 — Push assets
+## Step 2 — Upload assets
 
-From your machine or this cloud agent, run:
+### Option A — From your computer (easiest)
 
 ```bash
-cd /tmp/Apexwebworx   # or clone from branch below
-git remote add origin https://github.com/jozue06/Apexwebworx.git
+git clone -b cursor/apexwebworx-logos-5bb4 https://github.com/jozue06/00-lab.git
+cd 00-lab/Apexwebworx
+git init
+git add .
+git commit -m "Add Apex Detailing logo kit"
+git branch -M main
+git remote add origin https://github.com/apexwebworxusa-svg/apex-webworx.git
 git push -u origin main
 ```
 
-**Or** copy from the prepared branch:
+### Option B — GitHub web import
 
-```bash
-git clone -b cursor/apexwebworx-logos-5bb4 https://github.com/jozue06/00-lab.git temp
-cp -r temp/Apexwebworx/* .
-# then init and push to Apexwebworx
-```
+1. Create empty repo on apexwebworxusa-svg
+2. Upload files from `Apexwebworx/` folder via GitHub web UI (drag & drop)
 
-## What's included
+### Option C — Agent push (after repo exists)
 
-- `assets/logo-pack/` — all logo types (favicon, horizontal, icon, etc.)
-- `assets/apex-logo-primary.png` — main logo
-- `docs/APEX-DETAILING-BRAND-GUIDE.md` — brand reference
+Reply with the exact repo name (e.g. `apex-webworx`) after creating it.  
+Add **jozue06** as a collaborator with **Write** access so the cloud agent can push.
+
+---
+
+## What's in this folder
+
+| Path | Description |
+|------|-------------|
+| `assets/logo-pack/` | All logo types + favicons |
+| `assets/apex-logo-primary.png` | Main logo |
+| `docs/APEX-DETAILING-BRAND-GUIDE.md` | Brand guide |
