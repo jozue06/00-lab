@@ -24,7 +24,7 @@ def _bool(name: str, default: bool = False) -> bool:
 
 @dataclass(frozen=True)
 class Settings:
-    search_location: str
+    search_locations: list[str]
     search_radius_meters: int
     search_lat: float | None
     search_lng: float | None
@@ -57,8 +57,14 @@ class Settings:
         )
         search_queries = [q.strip() for q in queries_raw.split(",") if q.strip()]
 
+        locations_raw = os.getenv("SEARCH_LOCATIONS", "").strip()
+        if locations_raw:
+            search_locations = [loc.strip() for loc in locations_raw.split(",") if loc.strip()]
+        else:
+            search_locations = [_require("SEARCH_LOCATION")]
+
         return cls(
-            search_location=_require("SEARCH_LOCATION"),
+            search_locations=search_locations,
             search_radius_meters=int(os.getenv("SEARCH_RADIUS_METERS", "15000")),
             search_lat=search_lat,
             search_lng=search_lng,

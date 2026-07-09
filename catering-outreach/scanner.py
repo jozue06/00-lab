@@ -30,44 +30,47 @@ class BusinessScanner:
         self.session = requests.Session()
 
     def scan(self) -> list[Business]:
-        location = self._resolve_location()
         seen_ids: set[str] = set()
         businesses: list[Business] = []
 
-        for query in self.settings.search_queries:
-            search_text = f"{query} in {self.settings.search_location}"
-            logger.info("Searching: %s", search_text)
-            results = self._text_search(search_text, location)
-            for place in results:
-                place_id = place.get("place_id")
-                if not place_id or place_id in seen_ids:
-                    continue
-                seen_ids.add(place_id)
+        for area in self.settings.search_locations:
+            location = self._resolve_location(area)
+            logger.info("Scanning area: %s (center: %s)", area, location)
 
-                details = self._place_details(place_id)
-                business = Business(
-                    place_id=place_id,
-                    name=place.get("name", "Unknown"),
-                    address=place.get("formatted_address", ""),
-                    phone=details.get("formatted_phone_number"),
-                    website=details.get("website"),
-                    rating=place.get("rating"),
-                    user_ratings_total=place.get("user_ratings_total"),
-                )
-                businesses.append(business)
-                logger.info("Found: %s (%s)", business.name, business.address)
+            for query in self.settings.search_queries:
+                search_text = f"{query} in {area}"
+                logger.info("Searching: %s", search_text)
+                results = self._text_search(search_text, location)
+                for place in results:
+                    place_id = place.get("place_id")
+                    if not place_id or place_id in seen_ids:
+                        continue
+                    seen_ids.add(place_id)
 
-            time.sleep(0.5)
+                    details = self._place_details(place_id)
+                    business = Business(
+                        place_id=place_id,
+                        name=place.get("name", "Unknown"),
+                        address=place.get("formatted_address", ""),
+                        phone=details.get("formatted_phone_number"),
+                        website=details.get("website"),
+                        rating=place.get("rating"),
+                        user_ratings_total=place.get("user_ratings_total"),
+                    )
+                    businesses.append(business)
+                    logger.info("Found: %s (%s)", business.name, business.address)
+
+                time.sleep(0.5)
 
         logger.info("Scan complete: %d unique businesses", len(businesses))
         return businesses
 
-    def _resolve_location(self) -> str:
+    def _resolve_location(self, area: str) -> str:
         if self.settings.search_lat is not None and self.settings.search_lng is not None:
             return f"{self.settings.search_lat},{self.settings.search_lng}"
 
         params = {
-            "address": self.settings.search_location,
+            "address": area,
             "key": self.settings.google_places_api_key,
         }
         response = self.session.get(GEOCODE_URL, params=params, timeout=30)
@@ -75,7 +78,7 @@ class BusinessScanner:
         data = response.json()
         if data.get("status") != "OK" or not data.get("results"):
             raise RuntimeError(
-                f"Could not geocode location '{self.settings.search_location}': "
+                f"Could not geocode location '{area}': "
                 f"{data.get('status')} {data.get('error_message', '')}"
             )
         location = data["results"][0]["geometry"]["location"]

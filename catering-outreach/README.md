@@ -25,7 +25,8 @@ Copy `.env.example` to `.env` and set:
 
 | Variable | Description |
 |----------|-------------|
-| `SEARCH_LOCATION` | Your city/area, e.g. `Austin, TX` |
+| `SEARCH_LOCATIONS` | Comma-separated cities, e.g. `Springfield, MO,Nixa, MO,Ozark, MO` |
+| `SEARCH_RADIUS_METERS` | Radius around each city center (20000 ≈ 12 miles) |
 | `GOOGLE_PLACES_API_KEY` | [Google Cloud Console](https://console.cloud.google.com/apis/credentials) — enable Places API |
 | `SMTP_*` | Your email provider (Gmail app password, SendGrid, etc.) |
 | `FROM_NAME` / `FROM_EMAIL` | Who the email appears to come from |
