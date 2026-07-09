@@ -2,7 +2,7 @@
 
 This project is meant to run **locally on your computer**, not on mobile. Follow these steps on a desktop or laptop.
 
-## Step 1 — Save to your GitHub (`apexwebworxusa-svg`)
+## Step 1 — Save to your GitHub (`apexwebworxusa-svg/outreach-app`)
 
 ### Option A: Create a new repo and push (recommended)
 
@@ -10,30 +10,30 @@ On your PC, open **Terminal** (Mac/Linux) or **PowerShell** (Windows):
 
 ```bash
 # 1. Clone the ready-to-use standalone branch
-git clone -b catering-outreach-standalone https://github.com/jozue06/00-lab.git catering-outreach
-cd catering-outreach
+git clone -b catering-outreach-standalone https://github.com/jozue06/00-lab.git outreach-app
+cd outreach-app
 
-# 2. Create a new empty repo on GitHub:
+# 2. Create a new empty repo on GitHub (if you haven't yet):
 #    Go to https://github.com/new
 #    Owner: apexwebworxusa-svg
-#    Name: catering-outreach
+#    Name: outreach-app
 #    Leave it empty (no README)
 
 # 3. Point git to YOUR repo and push
 git remote rename origin old-origin
-git remote add origin https://github.com/apexwebworxusa-svg/catering-outreach.git
+git remote add origin https://github.com/apexwebworxusa-svg/outreach-app.git
 git push -u origin catering-outreach-standalone:main
 ```
 
 Your code will live at:
-**https://github.com/apexwebworxusa-svg/catering-outreach**
+**https://github.com/apexwebworxusa-svg/outreach-app**
 
 ### Option B: Download ZIP (no git)
 
 1. Open: https://github.com/jozue06/00-lab/tree/catering-outreach-standalone
 2. Click **Code → Download ZIP**
-3. Unzip on your PC
-4. (Optional) Upload folder to a new repo on https://github.com/apexwebworxusa-svg
+3. Unzip on your PC and rename the folder to `outreach-app`
+4. (Optional) Upload folder to https://github.com/apexwebworxusa-svg/outreach-app
 
 ---
 
@@ -55,7 +55,7 @@ python3 --version
 ## Step 3 — Install and configure
 
 ```bash
-cd catering-outreach
+cd outreach-app
 
 # Windows
 python -m venv .venv
@@ -68,6 +68,8 @@ source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
 ```
+
+On Windows use `copy .env.example .env` instead of `cp`.
 
 Edit `.env` with a text editor (Notepad, VS Code, etc.):
 
@@ -100,6 +102,8 @@ From the dashboard:
 4. **Preview**
 5. When ready, set `DRY_RUN=false` in `.env` and click **Send to unsent**
 
+**Windows shortcut:** double-click `start-windows.bat`
+
 ---
 
 ## Troubleshooting on Windows
@@ -118,12 +122,12 @@ From the dashboard:
 On any PC in the future, just:
 
 ```bash
-git clone https://github.com/apexwebworxusa-svg/catering-outreach.git
-cd catering-outreach
+git clone https://github.com/apexwebworxusa-svg/outreach-app.git
+cd outreach-app
 python -m venv .venv
 .venv\Scripts\activate        # Windows
 # source .venv/bin/activate   # Mac/Linux
 pip install -r requirements.txt
-cp .env.example .env          # then edit .env
+cp .env.example .env          # Windows: copy .env.example .env
 python main.py web
 ```

@@ -10,7 +10,7 @@ A Python tool to find catering businesses in your area, discover their contact e
 
 ## Quick start (on your PC)
 
-> **First time?** See **[SETUP_ON_PC.md](SETUP_ON_PC.md)** for full Windows/Mac setup and how to save this to your GitHub (`apexwebworxusa-svg`).
+> **First time?** See **[SETUP_ON_PC.md](SETUP_ON_PC.md)** for full Windows/Mac setup and how to save this to **https://github.com/apexwebworxusa-svg/outreach-app**
 
 ```bash
 python3 -m venv .venv
