@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catering Outreach Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div>
+        <h1>Catering Outreach</h1>
+        <p class="subtitle" id="locations">Loading...</p>
+      </div>
+      <div class="badge" id="dry-run-badge">Dry run</div>
+    </header>
+
+    <section class="stats-grid" id="stats-grid">
+      <div class="stat-card"><span class="stat-value" id="stat-total">0</span><span class="stat-label">Total leads</span></div>
+      <div class="stat-card"><span class="stat-value" id="stat-ready">0</span><span class="stat-label">Ready to email</span></div>
+      <div class="stat-card"><span class="stat-value" id="stat-emailed">0</span><span class="stat-label">Already emailed</span></div>
+      <div class="stat-card"><span class="stat-value" id="stat-no-email">0</span><span class="stat-label">No email found</span></div>
+    </section>
+
+    <div class="job-banner hidden" id="job-banner">
+      <span id="job-message">Working...</span>
+    </div>
+    <div class="job-error hidden" id="job-error"></div>
+
+    <div class="layout">
+      <section class="panel">
+        <h2>Actions</h2>
+        <p class="panel-help">Scan your area, find emails, then send only to businesses that have not been contacted yet.</p>
+        <div class="actions">
+          <button class="btn btn-secondary" id="btn-scan">Scan businesses</button>
+          <button class="btn btn-secondary" id="btn-find-emails">Find emails</button>
+          <button class="btn btn-primary" id="btn-send">Send to unsent (<span id="unsent-count">0</span>)</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Email composer</h2>
+        <p class="panel-help">
+          Write your message below. Use placeholders:
+          <code>{business_name}</code>, <code>{sender_name}</code>, <code>{reply_to}</code>, <code>{business_address}</code>
+        </p>
+
+        <label for="email-subject">Subject</label>
+        <input type="text" id="email-subject" class="input">
+
+        <label for="email-body">Message</label>
+        <textarea id="email-body" class="textarea" rows="14"></textarea>
+
+        <div class="actions">
+          <button class="btn btn-secondary" id="btn-save-template">Save template</button>
+          <button class="btn btn-secondary" id="btn-preview">Preview</button>
+        </div>
+
+        <div class="preview hidden" id="preview-box">
+          <h3>Preview</h3>
+          <p><strong>To:</strong> <span id="preview-to"></span></p>
+          <p><strong>Subject:</strong> <span id="preview-subject"></span></p>
+          <pre id="preview-body"></pre>
+        </div>
+      </section>
+    </div>
+
+    <section class="panel">
+      <div class="panel-header">
+        <h2>Leads</h2>
+        <select id="lead-filter" class="select">
+          <option value="all">All</option>
+          <option value="ready">Ready to email</option>
+          <option value="emailed">Already emailed</option>
+          <option value="discovered">Discovered</option>
+          <option value="no_email">No email</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Website</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="leads-body">
+            <tr><td colspan="5" class="empty">No leads yet. Click "Scan businesses" to start.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

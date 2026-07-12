@@ -1,0 +1,19 @@
+Hi {business_name} team,
+
+I hope this message finds you well. I came across {business_name} while researching catering businesses in the area, and I wanted to reach out with a quick question.
+
+Are you currently interested in refreshing or building a new website for your catering business? I help local food and event businesses create modern, mobile-friendly sites that make it easier for customers to view menus, request quotes, and book events online.
+
+If this is something you'd like to explore, I'd be happy to share a few ideas tailored to {business_name} — no obligation at all.
+
+Would you be open to a brief conversation this week?
+
+Best regards,
+{sender_name}
+
+---
+If you'd prefer not to receive messages like this, simply reply with "unsubscribe" and I won't contact you again.
+
+{sender_name}
+{reply_to}
+{business_address}
